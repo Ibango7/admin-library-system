@@ -1,0 +1,28 @@
+.bookscontainer {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+  
+  .book {
+    width: 100px;
+    border: 1px solid #ccc;
+    background-color: chocolate;
+    border-radius: 5px;
+    overflow: hidden;
+  }
+  
+  .test {
+    color: #fff;
+    transition: all 0.5s ease;
+  }
+  .book img {
+    width: 100%;
+    height: auto;
+  }
+  
+  .info {
+    padding: 10px;
+  }
+  
