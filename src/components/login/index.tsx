@@ -19,13 +19,14 @@ const Login: React.FC = () => {
         <div className={styles.loginContainer}>
             <Form
                 name="normal_login"
-                className="loginForm"
+                className={styles.loginForm}
                 initialValues={{ remember: true }}
                 onFinish={onFinish}
             >
+                <h3 style={{textAlign:"center"}}>Admin login</h3>
                 <Form.Item
-                    name="username"
-                    rules={[{ required: true, message: 'Please input your Username!' }]}
+                    name="email"
+                    rules={[{ type:"email", required: true, message: 'Please input valid email' }]}
                 >
                     <Input prefix={<UserOutlined className={styles.siteFormItemIcon} />} placeholder="Username" />
                 </Form.Item>
@@ -39,11 +40,11 @@ const Login: React.FC = () => {
                         placeholder="Password"
                     />
                 </Form.Item>
-                <Form.Item>
+                {/* <Form.Item>
                     <Form.Item name="remember" valuePropName="checked" noStyle>
                         <Checkbox>Remember me</Checkbox>
                     </Form.Item>
-                </Form.Item>
+                </Form.Item> */}
 
                 <Form.Item>
                     <Button type="primary" htmlType="submit" className={styles.loginFormButton} loading={loading}>

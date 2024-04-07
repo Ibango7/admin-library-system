@@ -1,16 +1,11 @@
 'use client';
-import { Layout, Breadcrumb, Card, Button, Table, Input, Modal} from 'antd';
-import { SearchOutlined} from '@ant-design/icons';
-import React, {useEffect, useState} from 'react';
-
-const {Content, Footer } = Layout;
+import { Layout, Breadcrumb, Card, Button, Table, Input, Modal } from 'antd';
+import { SearchOutlined } from '@ant-design/icons';
+import React, { useEffect, useState, useContext } from 'react';
+import { BookStateContext, BookActionContext } from '@/providers/bookProvider/context';
+import { IBook } from '../self-organizing-shelf/self-organizing-class/Node';
+const { Content, Footer } = Layout;
 const { Search } = Input;
-
-const allBooksData = [
-  { key: '1', isbn: '123456789', title: 'Book 1', author: 'Author 1', genre: 'Genre 1', quantity: 5, shelf: 'Shelf 1' },
-  { key: '2', isbn: '987654321', title: 'Book 2', author: 'Author 2', genre: 'Genre 2', quantity: 10, shelf: 'Shelf 2' },
-  { key: '3', isbn: '567891234', title: 'Book 3', author: 'Author 3', genre: 'Genre 3', quantity: 8, shelf: 'Shelf 3' },
-];
 
 const mostBorrowedBooksData = [
   { key: '1', title: 'Book 1', genre: 'Genre 1', author: 'Author 1', isbn: '123456789' },
@@ -31,26 +26,53 @@ const usersWithQueueBooksData = [
 ];
 
 const Admin: React.FC = (props) => {
-   // State for the search input value
-   const [searchValue, setSearchValue] = useState('');
-  const [filteredBooks, setFilteredBooks] = useState(allBooksData);
+  // State for the search input value
+  const [searchValue, setSearchValue] = useState('');
+  const [filteredBooks, setFilteredBooks] = useState<IBook[]>([]);
   const [isModalVisible, setIsModalVisible] = useState(false);
+  const { books } = useContext(BookStateContext);
+  const { getAllBooks, getBookByISBN } = useContext(BookActionContext);
 
-    // Effect to filter books when search value changes
-    useEffect(() => {
-      const filtered = allBooksData.filter(book =>
-        book.title.toLowerCase().includes(searchValue.toLowerCase()) ||
-        book.isbn.toLowerCase().includes(searchValue.toLowerCase()) ||
-        book.author.toLowerCase().includes(searchValue.toLowerCase())
-      );
-      setFilteredBooks(filtered);
-    }, [searchValue]);
+  // Store the original array of books
+  const [originalBooks, setOriginalBooks] = useState<IBook[]>([]);
 
+  useEffect(() => {
+    const handleGetAllBooks = async () => {
+      try {
+        if (getAllBooks) {
+          const response = await getAllBooks();
+          setOriginalBooks(response);
+        }
+      } catch (error) {
+        console.log("Error in useEffect while trying to get books", error);
+      }
+    }
 
-   // Function to handle search input change
-   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const trimmedValue = e.target.value.trim(); // Trim whitespace
-    setSearchValue(trimmedValue);
+    handleGetAllBooks();
+  }, []);
+
+  // Function to handle search input change
+  const handleSearch = async () => {
+    const trimmedValue = searchValue.trim();
+
+    try {
+      const response = await getBookByISBN(trimmedValue);
+      // console.log("Response::;?",response);
+      if (response) {
+        setFilteredBooks([response]);
+      } else {
+        console.log("Response::;?",response);
+        setFilteredBooks([]);
+      }
+    } catch (error) {
+      console.log("Error searching for book", error);
+    }
+  };
+
+  // Function to handle clearing the search
+  const handleClearSearch = () => {
+    setSearchValue('');
+    setFilteredBooks(originalBooks); // Reset filteredBooks to the original list of books
   };
 
   const downloadPDF = () => {
@@ -121,10 +143,13 @@ const Admin: React.FC = (props) => {
                 placeholder="Search for books"
                 allowClear
                 enterButton={<SearchOutlined />}
-                onChange={handleSearchChange}
+                value={searchValue}
+                onChange={(e) => setSearchValue(e.target.value)}
+                onSearch={handleSearch}
                 style={{ marginBottom: 16 }}
               />
-              <Table dataSource={filteredBooks} columns={columnsAllBooks} pagination={{ pageSize: 10 }} />
+              <Button onClick={handleClearSearch}>Clear Search</Button>
+              <Table dataSource={filteredBooks.length ? filteredBooks : books} columns={columnsAllBooks} pagination={{ pageSize: 18 }} />
             </Card>
             <Card title="Most Borrowed Books" style={{ marginTop: 16 }}>
               <Table dataSource={mostBorrowedBooksData} columns={columnsMostBorrowedBooks} pagination={false} />

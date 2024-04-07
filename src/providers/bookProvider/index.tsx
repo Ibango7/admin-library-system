@@ -2,13 +2,13 @@
 import React, { useReducer, useEffect, useState, FC, PropsWithChildren, useContext } from 'react';
 import { IBook, IbookGenre, BookActionContext, BookStateContext, BOOK_CONTEXT_INITIAL_STATE } from './context';
 import { bookReducer } from './reducer';
-import { getBooksAction, rentBookAction, getBookRentStatusAction} from './actions';
+import { getBookByISBNAction, rentBookAction, getBookRentStatusAction, getAllBooksAction} from './actions';
 import { httpClient } from '../httpClients/httpClients';
 import { Alert, notification } from 'antd';
 
+
 const BookProvider: FC<PropsWithChildren<any>> = ({ children }) => {
     const [state, dispatch] = useReducer(bookReducer, BOOK_CONTEXT_INITIAL_STATE);
-
     const warningMessage = () => {
         notification.open({
             message: "Rent book",
@@ -31,21 +31,19 @@ const BookProvider: FC<PropsWithChildren<any>> = ({ children }) => {
         })
     }
 
-    // eg: Book/GetBooksByGenre?genre=economics
-    const getBooksByGenre = async (genre: IbookGenre) => {
-        httpClient.get(`/Book/GetBooksByGenre?genre=${genre.genre.toString()}`)
-            .then(response => {
-                // console.log("genre passed:",genre);
-                // console.log("Books response", response.data.result)
-                dispatch(getBooksAction(response.data.result));
-                // store books in local storage
-                localStorage.setItem('books', JSON.stringify(response.data.result));
-            }).catch(error => {
-                console.log("error fetching books", error)
-            })
-    }
+    //Book/GetBookByISBN?isbn=
+    const getBookByISBN = async (isbn: string):Promise<IBook> => new Promise((resolve, reject) =>{
+        httpClient.get(`/Book/GetBookByISBN?isbn=${isbn}`)
+        .then(response => {
+            // console.log("ISBN RESULT", response.data.result)
+            resolve(response.data.result)
+            dispatch(getBookByISBNAction(response.data.result));
+        }).catch(error => {
+            reject(error);
+            console.log("error searching book", error)
+        })
+    })
 
-    // https://localhost:44311/api/services/app/BookManager/RentBook?bookId=FA3071C8-DB5C-4789-EC26-08DC4FDADA4C&userId=1
     const rentBook = async (bookId:string, userId:number) =>{
         httpClient.post(`/BookManager/RentBook?bookId=${bookId}&userId=${userId}`)
         .then(Response => {
@@ -97,10 +95,30 @@ const BookProvider: FC<PropsWithChildren<any>> = ({ children }) => {
         })
     })
 
+    // get all books
+    const getAllBooks = (): Promise<any> => new Promise((resolve, reject) =>{
+        httpClient.get(`Book/GetAll`)
+        .then((response) => {
+            resolve(response.data.result.items);
+            // dispatch
+            const payload:IBook[] = response.data.result.items;
+            dispatch(getAllBooksAction(payload))
+        })
+        .catch(error =>{
+            reject(error);
+            console.log("Error getting all books")
+        })
+    })
+
     return (
         <BookStateContext.Provider value={{ ...state }}>
             <BookActionContext.Provider 
-                value={{ getBooksByGenre, rentBook, getQuantity,isBookRented, getRecommended }}> 
+                value={{ getBookByISBN, 
+                        rentBook,
+                        getQuantity, 
+                        isBookRented,
+                        getRecommended,
+                        getAllBooks }}> 
                   {children}
                 </BookActionContext.Provider>
         </BookStateContext.Provider>

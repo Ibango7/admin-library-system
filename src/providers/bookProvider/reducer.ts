@@ -9,7 +9,7 @@ export const bookReducer = handleActions({
         // console.log("get books by genre ACTION triggered", action.payload.books.result);
         return {
             ...state,
-            books:action.payload.books
+            book:action.payload.books
         }
     },
 
@@ -37,6 +37,13 @@ export const bookReducer = handleActions({
         // console.log("Get Book status action triggered");
         return {
             ...state
+        }
+    },
+    [actionType.GET_ALL_BOOKS]:(state, action) => {
+        console.log("Get all books action triggered");
+        return {
+            ...state,
+            books:action.payload.books
         }
     }
 

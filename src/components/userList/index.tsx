@@ -51,7 +51,7 @@ const UsersList: React.FC = () => {
         renderItem={(user, key) => (
           <List.Item
             actions={[
-              <Button type="primary" key={key} onClick={() => handleOpenModal(user)}>Delete</Button>,
+              <Button type="primary" key={key} onClick={() => handleOpenModal(user)}>Deactivate account</Button>,
             ]}
           >
             {user.name}
