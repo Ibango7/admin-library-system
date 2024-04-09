@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import { List, Modal, Button } from 'antd';
+import { UserStateContext, UserActionContext } from '@/providers/usersProvider/context';
 
 // Define the User type
 type User = {
@@ -8,6 +9,9 @@ type User = {
 };
 
 const UsersList: React.FC = () => {
+  const {getUsers} = useContext(UserActionContext);
+  const [userList, setUserState] = useState();
+
   // State to store the list of users
   const [users, setUsers] = useState<User[]>([
     { id: 1, name: 'User 1' },
@@ -17,9 +21,24 @@ const UsersList: React.FC = () => {
 
   // State for the selected user
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
-
   // State for modal visibility
   const [isModalVisible, setIsModalVisible] = useState(false);
+
+
+  useEffect(() => {
+    const handleGetUsers = async () =>{
+      try{
+        const response = await getUsers();
+        if(response){
+          setUserState(response)
+        }
+      }catch(error){
+        console.log("error getting users", error)
+      }
+    }
+
+    handleGetUsers();
+  },[]);
 
   // Function to handle user deletion
   const handleDeleteUser = (userId: number) => {
@@ -47,14 +66,15 @@ const UsersList: React.FC = () => {
     <div>
       <h3 style={{textAlign:"center"}}>Users List</h3>
       <List
-        dataSource={users}
-        renderItem={(user, key) => (
+        dataSource={userList}
+        renderItem={(user:any, key) => (
           <List.Item
             actions={[
               <Button type="primary" key={key} onClick={() => handleOpenModal(user)}>Deactivate account</Button>,
             ]}
           >
-            {user.name}
+            <p>{user.fullName}</p>
+            <p>{user.emailAddress}</p>
           </List.Item>
         )}
       />

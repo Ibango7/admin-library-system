@@ -1,6 +1,7 @@
 import React from 'react';
 import { AuthProvider } from '@/providers/authProvider';
 import BookProvider from '../bookProvider';
+import UserProvider from '../usersProvider';
 // import RegisterUserProvider from '../registerProvider';
 // import UserProvider from '../userProfileProvider';
 
@@ -13,9 +14,9 @@ const AppProviders: React.FC<AppProvidersProps> = ({ children }) => {
         <AuthProvider>
             <BookProvider>
                 {/* <RegisterUserProvider> */}
-                    {/* <UserProvider> */}
+                    <UserProvider>
                         {children}
-                    {/* </UserProvider> */}
+                    </UserProvider>
                 {/* </RegisterUserProvider> */}
             </BookProvider>
         </AuthProvider>

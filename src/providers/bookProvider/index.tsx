@@ -95,9 +95,9 @@ const BookProvider: FC<PropsWithChildren<any>> = ({ children }) => {
         })
     })
 
-    // get all books
+
     const getAllBooks = (): Promise<any> => new Promise((resolve, reject) =>{
-        httpClient.get(`Book/GetAll`)
+        httpClient.get(`Book/GetAll?MaxResultCount=150`)
         .then((response) => {
             resolve(response.data.result.items);
             // dispatch
